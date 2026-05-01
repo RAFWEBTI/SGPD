@@ -1,0 +1,293 @@
+<!doctype html>
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sistema de Processos</title>
+
+    <style>
+      body {
+        font-family: "Segoe UI", Arial;
+        margin: 0;
+        background: #f5f6fa;
+      }
+
+      header {
+        padding: 15px 20px;
+        color: white;
+        font-size: 18px;
+      }
+
+      .solicitante {
+        background: #2e7d32;
+      }
+      .aprovador {
+        background: #6a1b9a;
+      }
+
+      .container {
+        padding: 20px;
+        max-width: 900px;
+        margin: auto;
+      }
+
+      .screen {
+        display: none;
+      }
+      .active {
+        display: block;
+      }
+
+      .card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        margin-top: 0;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+
+      button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #1976d2;
+        color: white;
+        margin-right: 5px;
+      }
+
+      .secondary {
+        background: #999;
+      }
+
+      .danger {
+        background: #d32f2f;
+      }
+
+      .status {
+        padding: 6px 10px;
+        border-radius: 4px;
+        display: inline-block;
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+
+      .status.andamento {
+        background: #fff3cd;
+      }
+      .status.aprovado {
+        background: #c8e6c9;
+      }
+      .status.rejeitado {
+        background: #ffcdd2;
+      }
+
+      .steps {
+        display: flex;
+        margin-bottom: 20px;
+      }
+
+      .step {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+      }
+
+      .step.active {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="header">Sistema</header>
+
+    <div class="container">
+      <!-- LOGIN -->
+
+      <div id="login" class="screen active">
+        <div class="card">
+          <h2>Login</h2>
+          <input placeholder="Usuário" />
+          <input type="password" placeholder="Senha" />
+          <button onclick="go('painelSolicitante', 'solicitante')">
+            Solicitante
+          </button>
+          <button onclick="go('painelAprovador', 'aprovador')">
+            Aprovador
+          </button>
+        </div>
+      </div>
+
+      <!-- PAINEL SOLICITANTE -->
+
+      <div id="painelSolicitante" class="screen">
+        <div class="card">
+          <h2>Painel do Solicitante</h2>
+          <button onclick="go('cadastro')">Novo Processo</button>
+        </div>
+      </div>
+
+      <!-- CADASTRO -->
+
+      <div id="cadastro" class="screen">
+        <div class="steps">
+          <div class="step active">Cadastro</div>
+          <div class="step">Upload</div>
+          <div class="step">Confirmação</div>
+        </div>
+        <div class="card">
+          <h2>Cadastro</h2>
+          <input placeholder="Nome do processo" />
+          <button onclick="go('upload')">Próximo</button>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+
+      <div id="upload" class="screen">
+        <div class="steps">
+          <div class="step">Cadastro</div>
+          <div class="step active">Upload</div>
+          <div class="step">Confirmação</div>
+        </div>
+        <div class="card">
+          <h2>Upload de Documentos</h2>
+          <input type="file" />
+          <button onclick="gerarProtocolo()">Enviar</button>
+        </div>
+      </div>
+
+      <!-- CONFIRMAÇÃO -->
+
+      <div id="confirmacao" class="screen">
+        <div class="steps">
+          <div class="step">Cadastro</div>
+          <div class="step">Upload</div>
+          <div class="step active">Confirmação</div>
+        </div>
+        <div class="card">
+          <h2>Processo enviado</h2>
+          <span class="status andamento">Em análise</span>
+          <p id="protocolo"></p>
+          <button onclick="go('login')">Finalizar</button>
+        </div>
+      </div>
+
+      <!-- PAINEL APROVADOR -->
+
+      <div id="painelAprovador" class="screen">
+        <div class="card">
+          <h2>Fila de Processos</h2>
+          <div class="card">
+            <span class="status andamento">Em análise</span>
+            Processo #12345
+            <br /><br />
+            <button onclick="go('revisao')">Revisar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVISÃO -->
+
+      <div id="revisao" class="screen">
+        <div class="card">
+          <h2>Revisão do Processo</h2>
+          <p>Documentos e dados do processo...</p>
+          <button onclick="go('decisao')">Avançar para decisão</button>
+        </div>
+      </div>
+
+      <!-- DECISÃO -->
+
+      <div id="decisao" class="screen">
+        <div class="card">
+          <h2>Decisão</h2>
+          <textarea
+            id="justificativa"
+            placeholder="Justificativa obrigatória"
+          ></textarea>
+          <button onclick="aprovar()">Aprovar</button>
+          <button class="danger" onclick="rejeitar()">Rejeitar</button>
+        </div>
+      </div>
+
+      <!-- CONFIRMAÇÃO -->
+
+      <div id="decisaoOk" class="screen">
+        <div class="card">
+          <h2>Processo Aprovado</h2>
+          <span class="status aprovado">Aprovado</span>
+          <button onclick="go('login')">Encerrar</button>
+        </div>
+      </div>
+
+      <!-- REJEITADO -->
+
+      <div id="rejeitado" class="screen">
+        <div class="card">
+          <h2>Processo Rejeitado</h2>
+          <span class="status rejeitado">Rejeitado</span>
+          <p id="motivo"></p>
+          <button onclick="go('notificacao')">Notificar</button>
+        </div>
+      </div>
+
+      <!-- NOTIFICAÇÃO -->
+
+      <div id="notificacao" class="screen">
+        <div class="card">
+          <h2>Solicitante Notificado</h2>
+          <button onclick="go('login')">Finalizar</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function go(id, tipo) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+
+        if (tipo === "solicitante") header.className = "solicitante";
+        if (tipo === "aprovador") header.className = "aprovador";
+      }
+
+      function gerarProtocolo() {
+        const num = Math.floor(Math.random() * 100000);
+        document.getElementById("protocolo").innerText = "Protocolo: #" + num;
+        go("confirmacao");
+      }
+
+      function aprovar() {
+        if (!justificativa.value) {
+          alert("Justificativa obrigatória");
+          return;
+        }
+        go("decisaoOk");
+      }
+
+      function rejeitar() {
+        if (!justificativa.value) {
+          alert("Justificativa obrigatória");
+          return;
+        }
+        document.getElementById("motivo").innerText = justificativa.value;
+        go("rejeitado");
+      }
+    </script>
+  </body>
+</html>

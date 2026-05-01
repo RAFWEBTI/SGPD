@@ -1,0 +1,191 @@
+<!doctype html>
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Protótipo - Sistema de Processos</title>
+    <style>
+      body {
+        font-family: Arial;
+        margin: 0;
+      }
+      header {
+        padding: 10px;
+        color: white;
+      }
+      .solicitante {
+        background: #2e7d32;
+      }
+      .aprovador {
+        background: #6a1b9a;
+      }
+      .container {
+        padding: 20px;
+      }
+      .screen {
+        display: none;
+      }
+      .active {
+        display: block;
+      }
+      button {
+        padding: 10px;
+        margin: 5px;
+        cursor: pointer;
+      }
+      input,
+      textarea {
+        display: block;
+        margin: 10px 0;
+        padding: 8px;
+        width: 100%;
+      }
+      .card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="header">Sistema</header>
+
+    <div class="container">
+      <!-- LOGIN -->
+
+      <div id="login" class="screen active">
+        <h2>Login</h2>
+        <input placeholder="Usuário" />
+        <input placeholder="Senha" type="password" />
+        <button onclick="go('painelSolicitante', 'solicitante')">
+          Entrar como Solicitante
+        </button>
+        <button onclick="go('painelAprovador', 'aprovador')">
+          Entrar como Aprovador
+        </button>
+      </div>
+
+      <!-- PAINEL SOLICITANTE -->
+
+      <div id="painelSolicitante" class="screen">
+        <h2>Painel do Solicitante</h2>
+        <button onclick="go('cadastro')">Novo Processo</button>
+      </div>
+
+      <!-- CADASTRO -->
+
+      <div id="cadastro" class="screen">
+        <h2>Cadastro</h2>
+        <input placeholder="Nome do processo" />
+        <button onclick="go('upload')">Avançar</button>
+      </div>
+
+      <!-- UPLOAD -->
+
+      <div id="upload" class="screen">
+        <h2>Upload de Documentos</h2>
+        <input type="file" />
+        <button onclick="gerarProtocolo()">Enviar</button>
+      </div>
+
+      <!-- CONFIRMAÇÃO -->
+
+      <div id="confirmacao" class="screen">
+        <h2>Processo enviado!</h2>
+        <p id="protocolo"></p>
+        <button onclick="go('login')">Voltar</button>
+      </div>
+
+      <!-- PAINEL APROVADOR -->
+
+      <div id="painelAprovador" class="screen">
+        <h2>Fila de Processos</h2>
+        <div class="card">
+          Processo #12345
+          <button onclick="go('revisao')">Revisar</button>
+        </div>
+      </div>
+
+      <!-- REVISÃO -->
+
+      <div id="revisao" class="screen">
+        <h2>Revisão do Processo</h2>
+        <p>Detalhes do processo...</p>
+        <button onclick="go('decisao')">Decidir</button>
+      </div>
+
+      <!-- DECISÃO -->
+
+      <div id="decisao" class="screen">
+        <h2>Decisão</h2>
+        <textarea
+          id="justificativa"
+          placeholder="Justificativa obrigatória"
+        ></textarea>
+        <button onclick="aprovar()">Aprovar</button>
+        <button onclick="rejeitar()">Rejeitar</button>
+      </div>
+
+      <!-- CONFIRMAÇÃO DECISÃO -->
+
+      <div id="decisaoOk" class="screen">
+        <h2>Decisão registrada</h2>
+        <button onclick="go('login')">Voltar</button>
+      </div>
+
+      <!-- REJEIÇÃO -->
+
+      <div id="rejeitado" class="screen">
+        <h2>Processo Rejeitado</h2>
+        <p id="motivo"></p>
+        <button onclick="go('notificacao')">Notificar solicitante</button>
+      </div>
+
+      <!-- NOTIFICAÇÃO -->
+
+      <div id="notificacao" class="screen">
+        <h2>Solicitante Notificado</h2>
+        <button onclick="go('login')">Voltar</button>
+      </div>
+    </div>
+
+    <script>
+      function go(id, tipo) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+
+        if (tipo === "solicitante") {
+          header.className = "solicitante";
+        } else if (tipo === "aprovador") {
+          header.className = "aprovador";
+        }
+      }
+
+      function gerarProtocolo() {
+        const num = Math.floor(Math.random() * 100000);
+        document.getElementById("protocolo").innerText = "Protocolo: #" + num;
+        go("confirmacao");
+      }
+
+      function aprovar() {
+        if (!document.getElementById("justificativa").value) {
+          alert("Justificativa obrigatória");
+          return;
+        }
+        go("decisaoOk");
+      }
+
+      function rejeitar() {
+        const motivo = document.getElementById("justificativa").value;
+        if (!motivo) {
+          alert("Justificativa obrigatória");
+          return;
+        }
+        document.getElementById("motivo").innerText = "Motivo: " + motivo;
+        go("rejeitado");
+      }
+    </script>
+  </body>
+</html>

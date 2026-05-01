@@ -1,340 +1,1835 @@
 <!doctype html>
-
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Sistema de Processos</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SisProc — Sistema de Gestão de Processos</title>
     <style>
+      /* ===================== VARIÁVEIS ===================== */
+      :root {
+        --sol: #2e7d32;
+        --sol-light: #e8f5e9;
+        --sol-dark: #1b5e20;
+        --apr: #6a1b9a;
+        --apr-light: #f3e5f5;
+        --apr-dark: #4a148c;
+        --sidebar-w: 240px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: "Segoe UI", Arial;
+        font-family: "Segoe UI", system-ui, Arial, sans-serif;
         margin: 0;
-        background: #f5f6fa;
+        background: #f0f2f5;
+        color: #333;
+      }
+
+      /* ===================== TELA DE LOGIN ===================== */
+      #tela-login {
+        display: none;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1e1e2e 0%, #313244 100%);
+        align-items: center;
+        justify-content: center;
+      }
+      #tela-login.ativo {
+        display: flex;
+      }
+
+      .login-box {
+        background: white;
+        border-radius: 14px;
+        padding: 44px 40px;
+        width: 390px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+      }
+      .login-logo {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+      .login-logo h1 {
+        margin: 0;
+        font-size: 24px;
+        color: #1e1e2e;
+        letter-spacing: -0.5px;
+      }
+      .login-logo p {
+        margin: 6px 0 0;
+        font-size: 13px;
+        color: #888;
+      }
+
+      .login-divider {
+        text-align: center;
+        color: #bbb;
+        font-size: 12px;
+        margin: 18px 0 10px;
+        position: relative;
+      }
+      .login-divider::before,
+      .login-divider::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 38%;
+        height: 1px;
+        background: #e8e8e8;
+      }
+      .login-divider::before {
+        left: 0;
+      }
+      .login-divider::after {
+        right: 0;
+      }
+
+      .login-roles {
+        display: flex;
+        gap: 10px;
+        margin-top: 4px;
+      }
+      .login-roles button {
+        flex: 1;
+        padding: 11px;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        transition: opacity 0.15s;
+      }
+      .login-roles button:hover {
+        opacity: 0.88;
+      }
+      .btn-sol {
+        background: var(--sol);
+        color: white;
+      }
+      .btn-apr {
+        background: var(--apr);
+        color: white;
+      }
+
+      /* ===================== LAYOUT PRINCIPAL ===================== */
+      #app {
+        display: none;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #app.ativo {
+        display: flex;
       }
 
       /* SIDEBAR */
-      .sidebar {
-        position: fixed;
-        width: 220px;
-        height: 100%;
-        background: #222;
+      #sidebar {
+        width: var(--sidebar-w);
+        background: #1e1e2e;
+        color: #cdd6f4;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+
+      .sb-logo {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .sb-logo h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        color: #cba6f7;
+      }
+      .sb-logo small {
+        font-size: 11px;
+        color: #585b70;
+      }
+
+      .sb-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
         color: white;
-        padding: 20px;
+        flex-shrink: 0;
+      }
+      .avatar.sol {
+        background: var(--sol);
+      }
+      .avatar.apr {
+        background: var(--apr);
+      }
+      .sb-user-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .sb-user-info strong {
+        display: block;
+        font-size: 13px;
+        color: #cdd6f4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .sb-user-info span {
+        font-size: 11px;
+        color: #585b70;
       }
 
-      .sidebar h3 {
-        margin-top: 0;
+      .sb-nav {
+        flex: 1;
+        padding: 10px 0;
+        overflow-y: auto;
       }
 
-      .sidebar button {
+      .nav-section {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: #585b70;
+        padding: 10px 20px 4px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #a6adc8;
+        border-left: 3px solid transparent;
+        transition: background 0.15s;
+        user-select: none;
+      }
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #cdd6f4;
+      }
+      .nav-item.ativo {
+        background: rgba(203, 166, 247, 0.1);
+        border-left-color: #cba6f7;
+        color: #cba6f7;
+      }
+      .nav-item .ico {
+        font-size: 15px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .sb-footer {
+        padding: 14px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .btn-logout {
         width: 100%;
-        margin: 5px 0;
-        background: #444;
+        padding: 9px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 7px;
+        color: #a6adc8;
+        cursor: pointer;
+        font-size: 13px;
+        font-family: inherit;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .btn-logout:hover {
+        background: rgba(243, 139, 168, 0.15);
+        color: #f38ba8;
       }
 
-      /* HEADER */
-      header {
-        margin-left: 220px;
-        padding: 15px;
-        color: white;
+      /* MAIN */
+      #main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
       }
 
-      .solicitante {
-        background: #2e7d32;
+      #topbar {
+        height: 56px;
+        background: white;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        gap: 12px;
+        flex-shrink: 0;
       }
-      .aprovador {
-        background: #6a1b9a;
+      .tb-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+        flex: 1;
+      }
+      .tb-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .tb-badge.sol {
+        background: var(--sol-light);
+        color: var(--sol-dark);
+      }
+      .tb-badge.apr {
+        background: var(--apr-light);
+        color: var(--apr-dark);
       }
 
-      /* CONTAINER */
-      .container {
-        margin-left: 220px;
-        padding: 20px;
-        max-width: 900px;
+      #content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
       }
 
-      /* COMPONENTES */
+      /* ===================== TELAS ===================== */
       .screen {
         display: none;
       }
-      .active {
+      .screen.ativo {
         display: block;
+      }
+
+      /* ===================== COMPONENTES ===================== */
+
+      .page-hd {
+        margin-bottom: 22px;
+      }
+      .page-hd h2 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      .page-hd p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .breadcrumb {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin-bottom: 18px;
+        font-size: 13px;
+        color: #999;
+      }
+      .breadcrumb a {
+        color: #1976d2;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        text-decoration: underline;
+      }
+      .breadcrumb-sep {
+        color: #ccc;
       }
 
       .card {
         background: white;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 15px 0;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 22px 24px;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+        border: 1px solid #e8e8e8;
+      }
+      .card h3 {
+        margin: 0 0 16px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #999;
+        font-weight: 700;
       }
 
-      input,
-      textarea {
+      /* Stepper */
+      .stepper {
+        display: flex;
+        background: white;
+        border-radius: 10px;
+        padding: 18px 24px;
+        border: 1px solid #e8e8e8;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        margin-bottom: 22px;
+        align-items: center;
+      }
+      .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        position: relative;
+      }
+      .step-item:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 13px;
+        left: 58%;
+        right: -38%;
+        height: 2px;
+        background: #e0e0e0;
+        z-index: 0;
+      }
+      .step-item.done:not(:last-child)::after {
+        background: #a5d6a7;
+      }
+      .step-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        z-index: 1;
+        position: relative;
+      }
+      .step-item.ativo .step-circle {
+        background: var(--sol);
+        color: white;
+      }
+      .step-item.done .step-circle {
+        background: #a5d6a7;
+        color: var(--sol-dark);
+      }
+      .step-lbl {
+        font-size: 11px;
+        color: #aaa;
+      }
+      .step-item.ativo .step-lbl {
+        color: var(--sol);
+        font-weight: 600;
+      }
+      .step-item.done .step-lbl {
+        color: var(--sol-dark);
+      }
+
+      /* Badges de status */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 11px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .badge::before {
+        content: "â—";
+        font-size: 7px;
+      }
+      .badge.andamento {
+        background: #fff8e1;
+        color: #e65100;
+      }
+      .badge.aprovado {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+      .badge.rejeitado {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .badge.enviado {
+        background: #e3f2fd;
+        color: #1565c0;
+      }
+
+      /* Métricas */
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+      .metric {
+        background: white;
+        border-radius: 10px;
+        padding: 18px 20px;
+        border: 1px solid #e8e8e8;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+      .metric-val {
+        font-size: 26px;
+        font-weight: 700;
+        color: #333;
+      }
+      .metric-lbl {
+        font-size: 12px;
+        color: #888;
+        margin-top: 3px;
+      }
+
+      /* Tabelas */
+      .tbl {
         width: 100%;
-        padding: 10px;
-        margin: 10px 0;
+        border-collapse: collapse;
+      }
+      .tbl th {
+        text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #999;
+        padding: 8px 12px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+      .tbl td {
+        padding: 13px 12px;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 14px;
+      }
+      .tbl tr:last-child td {
+        border-bottom: none;
+      }
+      .tbl tr:hover td {
+        background: #fafafa;
+      }
+      .tbl .col-r {
+        text-align: right;
       }
 
-      button {
-        padding: 10px;
+      /* Formulários */
+      .fg {
+        margin-bottom: 16px;
+      }
+      .fg label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 6px;
+      }
+      .fg input,
+      .fg select,
+      .fg textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 7px;
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        background: white;
+      }
+      .fg input:focus,
+      .fg select:focus,
+      .fg textarea:focus {
+        border-color: #6a1b9a;
+        box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.1);
+      }
+      .fg textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      .req {
+        color: #c62828;
+      }
+
+      /* Botões */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
         border: none;
-        border-radius: 5px;
+        border-radius: 7px;
         cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        transition:
+          opacity 0.15s,
+          transform 0.1s;
+      }
+      .btn:hover {
+        opacity: 0.88;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
         background: #1976d2;
         color: white;
       }
-
-      .danger {
-        background: #d32f2f;
+      .btn-success {
+        background: var(--sol);
+        color: white;
       }
-
-      .status {
-        padding: 5px 10px;
-        border-radius: 5px;
+      .btn-purple {
+        background: var(--apr);
+        color: white;
+      }
+      .btn-danger {
+        background: #c62828;
+        color: white;
+      }
+      .btn-ghost {
+        background: #f0f0f0;
+        color: #444;
+        border: 1px solid #ddd;
+      }
+      .btn-sm {
+        padding: 6px 12px;
         font-size: 12px;
       }
-
-      .andamento {
-        background: #fff3cd;
-      }
-      .aprovado {
-        background: #c8e6c9;
-      }
-      .rejeitado {
-        background: #ffcdd2;
-      }
-
-      .steps {
+      .btn-group {
         display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      /* Alertas */
+      .alert {
+        padding: 13px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        border-left: 4px solid;
+        font-size: 14px;
+      }
+      .alert-success {
+        background: #e8f5e9;
+        border-color: var(--sol);
+        color: var(--sol-dark);
+      }
+      .alert-danger {
+        background: #ffebee;
+        border-color: #c62828;
+        color: #b71c1c;
+      }
+      .alert-info {
+        background: #e3f2fd;
+        border-color: #1565c0;
+        color: #0d47a1;
+      }
+      .alert-warn {
+        background: #fff8e1;
+        border-color: #f57c00;
+        color: #e65100;
+      }
+
+      .proto-num {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--sol);
+        letter-spacing: 0.06em;
+        margin: 10px 0;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .ii label {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #999;
+        margin-bottom: 4px;
+      }
+      .ii span {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      /* Timeline */
+      .timeline {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .timeline li {
+        display: flex;
+        gap: 14px;
+        padding-bottom: 16px;
+        position: relative;
+      }
+      .timeline li:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 20px;
+        bottom: 0;
+        width: 2px;
+        background: #e0e0e0;
+      }
+      .tl-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 3px;
+        border: 2px solid;
+      }
+      .tl-dot.verde {
+        background: #c8e6c9;
+        border-color: var(--sol);
+      }
+      .tl-dot.amarelo {
+        background: #fff9c4;
+        border-color: #f57c00;
+      }
+      .tl-dot.vermelho {
+        background: #ffcdd2;
+        border-color: #c62828;
+      }
+      .tl-dot.roxo {
+        background: #e1bee7;
+        border-color: var(--apr);
+      }
+      .tl-content {
+        flex: 1;
+      }
+      .tl-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
+      .tl-date {
+        font-size: 12px;
+        color: #888;
+        margin-top: 2px;
+      }
+
+      .box-content {
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 7px;
+        padding: 12px 14px;
+        font-size: 14px;
+        color: #333;
+      }
+      .box-content.red {
+        background: #fff8f8;
+        border-color: #ffcdd2;
+      }
+      .box-content.green {
+        background: #f1f8f1;
+        border-color: #c8e6c9;
+      }
+
+      .doc-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 7px;
+        margin-bottom: 10px;
+        background: #fafafa;
+      }
+      .doc-name {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .doc-meta {
+        font-size: 12px;
+        color: #888;
+        margin-top: 2px;
+      }
+
+      .empty {
+        text-align: center;
+        padding: 36px 20px;
+        color: #aaa;
+      }
+      .empty .eico {
+        font-size: 38px;
         margin-bottom: 10px;
       }
 
-      .step {
-        flex: 1;
-        text-align: center;
+      hr.div {
+        border: none;
+        border-top: 1px solid #f0f0f0;
+        margin: 18px 0;
       }
 
-      .step.active {
-        font-weight: bold;
+      .notif-banner {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .notif-banner .nicon {
+        font-size: 32px;
+      }
+      .notif-banner h3 {
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+      .notif-banner p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
       }
     </style>
   </head>
-
   <body>
-    <!-- SIDEBAR -->
+    <!-- ============================================================
+         TELA DE LOGIN — fullscreen, sem sidebar
+         ============================================================ -->
+    <div id="tela-login" class="ativo">
+      <div class="login-box">
+        <div class="login-logo">
+          <h1>SisProc</h1>
+          <p>Sistema de Gestão de Processos</p>
+        </div>
 
-    <div class="sidebar">
-      <h3>Sistema</h3>
-      <button onclick="go('painelSolicitante', 'solicitante')">
-        Solicitante
-      </button>
-      <button onclick="go('painelAprovador', 'aprovador')">Aprovador</button>
-      <button onclick="go('login')">Sair</button>
-    </div>
+        <div class="fg">
+          <label>Usuário</label>
+          <input
+            id="login-user"
+            type="text"
+            placeholder="Digite seu usuário"
+            autocomplete="username"
+          />
+        </div>
+        <div class="fg">
+          <label>Senha</label>
+          <input
+            id="login-pass"
+            type="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+        </div>
 
-    <header id="header">Sistema de Processos</header>
+        <div class="login-divider">Entrar como</div>
 
-    <div class="container">
-      <!-- LOGIN -->
-
-      <div id="login" class="screen active">
-        <div class="card">
-          <h2>Login</h2>
-          <input placeholder="Usuário" />
-          <input type="password" placeholder="Senha" />
-          <button onclick="go('painelSolicitante', 'solicitante')">
-            Entrar como Solicitante
+        <div class="login-roles">
+          <button class="btn-sol" onclick="entrar('solicitante')">
+            Solicitante
           </button>
-          <button onclick="go('painelAprovador', 'aprovador')">
-            Entrar como Aprovador
+          <button class="btn-apr" onclick="entrar('aprovador')">
+            Aprovador
           </button>
-        </div>
-      </div>
-
-      <!-- SOLICITANTE -->
-
-      <div id="painelSolicitante" class="screen">
-        <div class="card">
-          <h2>Painel do Solicitante</h2>
-          <button onclick="go('cadastro')">Novo Processo</button>
-        </div>
-      </div>
-
-      <div id="cadastro" class="screen">
-        <div class="steps">
-          <div class="step active">Cadastro</div>
-          <div class="step">Upload</div>
-          <div class="step">Confirmação</div>
-        </div>
-        <div class="card">
-          <h2>Cadastro</h2>
-          <input placeholder="Nome do processo" />
-          <button onclick="go('upload')">Próximo</button>
-        </div>
-      </div>
-
-      <div id="upload" class="screen">
-        <div class="steps">
-          <div class="step">Cadastro</div>
-          <div class="step active">Upload</div>
-          <div class="step">Confirmação</div>
-        </div>
-        <div class="card">
-          <h2>Upload</h2>
-          <input type="file" />
-          <button onclick="gerarProtocolo()">Enviar</button>
-        </div>
-      </div>
-
-      <div id="confirmacao" class="screen">
-        <div class="card">
-          <h2>Processo Enviado</h2>
-          <span id="statusBadge" class="status andamento"></span>
-          <p id="protocolo"></p>
-          <button onclick="go('login')">Finalizar</button>
-        </div>
-      </div>
-
-      <!-- APROVADOR -->
-
-      <div id="painelAprovador" class="screen">
-        <div class="card">
-          <h2>Fila de Processos</h2>
-          <div class="card">
-            <span id="statusFila" class="status andamento"></span>
-            <p id="filaId"></p>
-            <button onclick="go('revisao')">Revisar</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="revisao" class="screen">
-        <div class="card">
-          <h2>Revisão</h2>
-          <p id="detalheProcesso"></p>
-
-          ```
-          <div class="card">
-            <h3>Histórico</h3>
-            <ul id="historico"></ul>
-          </div>
-
-          <button onclick="go('decisao')">Decidir</button>
-          ```
-        </div>
-      </div>
-
-      <div id="decisao" class="screen">
-        <div class="card">
-          <h2>Decisão</h2>
-          <textarea
-            id="justificativa"
-            placeholder="Justificativa obrigatória"
-          ></textarea>
-          <button onclick="aprovar()">Aprovar</button>
-          <button class="danger" onclick="rejeitar()">Rejeitar</button>
-        </div>
-      </div>
-
-      <div id="decisaoOk" class="screen">
-        <div class="card">
-          <h2>Aprovado</h2>
-          <span class="status aprovado">Aprovado</span>
-          <button onclick="go('login')">Encerrar</button>
-        </div>
-      </div>
-
-      <div id="rejeitado" class="screen">
-        <div class="card">
-          <h2>Rejeitado</h2>
-          <span class="status rejeitado">Rejeitado</span>
-          <p id="motivo"></p>
-          <button onclick="go('notificacao')">Notificar</button>
-        </div>
-      </div>
-
-      <div id="notificacao" class="screen">
-        <div class="card">
-          <h2>Solicitante Notificado</h2>
-          <button onclick="go('login')">Finalizar</button>
         </div>
       </div>
     </div>
 
+    <!-- ============================================================
+         APP — sidebar + conteúdo (só aparece após login)
+         ============================================================ -->
+    <div id="app">
+      <!-- SIDEBAR -->
+      <div id="sidebar">
+        <div class="sb-logo">
+          <h2>SisProc</h2>
+          <small>Gestão de Processos</small>
+        </div>
+
+        <div class="sb-user">
+          <div class="avatar" id="sb-avatar">U</div>
+          <div class="sb-user-info">
+            <strong id="sb-username">Usuário</strong>
+            <span id="sb-role">—</span>
+          </div>
+        </div>
+
+        <nav class="sb-nav" id="sb-nav"></nav>
+
+        <div class="sb-footer">
+          <button class="btn-logout" onclick="logout()">
+            ⎋ &nbsp;Sair do sistema
+          </button>
+        </div>
+      </div>
+
+      <!-- ÁREA PRINCIPAL -->
+      <div id="main">
+        <div id="topbar">
+          <div class="tb-title" id="tb-title">Painel</div>
+          <span class="tb-badge" id="tb-badge">—</span>
+        </div>
+
+        <div id="content">
+          <!-- ================================================
+               UC-01: FLUXO DO SOLICITANTE
+               ================================================ -->
+
+          <!-- PAINEL DO SOLICITANTE -->
+          <div id="painelSolicitante" class="screen">
+            <div class="page-hd">
+              <h2>Meu Painel</h2>
+              <p>
+                Acompanhe o status das suas solicitações e abra novos processos.
+              </p>
+            </div>
+
+            <div class="metrics">
+              <div class="metric">
+                <div class="metric-val" id="m-total">0</div>
+                <div class="metric-lbl">Processos enviados</div>
+              </div>
+              <div class="metric">
+                <div class="metric-val" id="m-analise">0</div>
+                <div class="metric-lbl">Em análise</div>
+              </div>
+              <div class="metric">
+                <div class="metric-val" id="m-concluidos">0</div>
+                <div class="metric-lbl">Concluídos</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 16px;
+                "
+              >
+                <h3 style="margin: 0">Meus Processos</h3>
+                <button class="btn btn-success btn-sm" onclick="ir('cadastro')">
+                  + Novo Processo
+                </button>
+              </div>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Protocolo</th>
+                    <th>Processo</th>
+                    <th>Data de Envio</th>
+                    <th>Status</th>
+                    <th class="col-r">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tb-meus-processos">
+                  <tr>
+                    <td colspan="5">
+                      <div class="empty">
+                        <div class="eico">📋</div>
+                        Nenhum processo enviado ainda.
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CADASTRO — passo 1/3 -->
+          <div id="cadastro" class="screen">
+            <div class="breadcrumb">
+              <a onclick="ir('painelSolicitante')">Painel</a>
+              <span class="breadcrumb-sep">›</span> Novo Processo —
+              Identificação
+            </div>
+
+            <div class="stepper">
+              <div class="step-item ativo">
+                <div class="step-circle">1</div>
+                <span class="step-lbl">Identificação</span>
+              </div>
+              <div class="step-item">
+                <div class="step-circle">2</div>
+                <span class="step-lbl">Documentos</span>
+              </div>
+              <div class="step-item">
+                <div class="step-circle">3</div>
+                <span class="step-lbl">Confirmação</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Identificação do Processo</h3>
+              <div class="fg">
+                <label>Nome / Objeto <span class="req">*</span></label>
+                <input
+                  id="f-nome"
+                  type="text"
+                  placeholder="Ex.: Contratação de serviço de limpeza"
+                />
+              </div>
+              <div class="fg">
+                <label>Tipo de Processo <span class="req">*</span></label>
+                <select id="f-tipo">
+                  <option value="">Selecione...</option>
+                  <option>Prestação de Serviço</option>
+                  <option>Fornecimento de Material</option>
+                  <option>Consultoria Técnica</option>
+                  <option>Outro</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label
+                  >Descrição / Justificativa <span class="req">*</span></label
+                >
+                <textarea
+                  id="f-desc"
+                  placeholder="Descreva o objeto da solicitação e sua justificativa..."
+                ></textarea>
+              </div>
+              <div class="fg">
+                <label>Valor Estimado (R$)</label>
+                <input id="f-valor" type="text" placeholder="Ex.: 12.500,00" />
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-ghost" onclick="ir('painelSolicitante')">
+                  Cancelar
+                </button>
+                <button class="btn btn-success" onclick="irParaUpload()">
+                  Próximo →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPLOAD — passo 2/3 -->
+          <div id="upload" class="screen">
+            <div class="breadcrumb">
+              <a onclick="ir('painelSolicitante')">Painel</a>
+              <span class="breadcrumb-sep">›</span>
+              <a onclick="ir('cadastro')">Novo Processo</a>
+              <span class="breadcrumb-sep">›</span> Documentos
+            </div>
+
+            <div class="stepper">
+              <div class="step-item done">
+                <div class="step-circle">✓</div>
+                <span class="step-lbl">Identificação</span>
+              </div>
+              <div class="step-item ativo">
+                <div class="step-circle">2</div>
+                <span class="step-lbl">Documentos</span>
+              </div>
+              <div class="step-item">
+                <div class="step-circle">3</div>
+                <span class="step-lbl">Confirmação</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Anexar Documentos</h3>
+              <p style="color: #666; font-size: 14px; margin: -8px 0 16px">
+                Selecione os documentos exigidos para instrução do processo.
+              </p>
+              <div class="fg">
+                <label>Documento Principal <span class="req">*</span></label>
+                <input
+                  id="doc-principal"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                />
+              </div>
+              <div class="fg">
+                <label>Documentos Complementares</label>
+                <input
+                  id="doc-complementar"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.png,.jpg"
+                  multiple
+                />
+              </div>
+              <div
+                style="
+                  background: #f8f9fa;
+                  border: 1px dashed #ccc;
+                  border-radius: 7px;
+                  padding: 13px;
+                  font-size: 13px;
+                  color: #777;
+                  margin-top: 4px;
+                "
+              >
+                ℹ️ Formatos aceitos: PDF, DOC, DOCX, PNG, JPG — máx. 10 MB por
+                arquivo.
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-ghost" onclick="ir('cadastro')">
+                  ← Voltar
+                </button>
+                <button class="btn btn-success" onclick="gerarProtocolo()">
+                  Enviar Processo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONFIRMAÇÃO — passo 3/3 -->
+          <div id="confirmacao" class="screen">
+            <div class="stepper">
+              <div class="step-item done">
+                <div class="step-circle">✓</div>
+                <span class="step-lbl">Identificação</span>
+              </div>
+              <div class="step-item done">
+                <div class="step-circle">✓</div>
+                <span class="step-lbl">Documentos</span>
+              </div>
+              <div class="step-item ativo">
+                <div class="step-circle">3</div>
+                <span class="step-lbl">Confirmação</span>
+              </div>
+            </div>
+
+            <div class="alert alert-success">
+              ✅ Processo enviado com sucesso! Acompanhe o andamento pelo
+              painel.
+            </div>
+
+            <div class="card">
+              <h3>Número de Protocolo</h3>
+              <p style="color: #666; font-size: 14px; margin: -8px 0 10px">
+                Guarde este código para acompanhar sua solicitação.
+              </p>
+              <div class="proto-num" id="num-proto">—</div>
+              <span class="badge andamento">Em análise</span>
+              <hr class="div" />
+              <div class="info-grid" style="margin-top: 4px">
+                <div class="ii">
+                  <label>Processo</label><span id="c-nome">—</span>
+                </div>
+                <div class="ii">
+                  <label>Tipo</label><span id="c-tipo">—</span>
+                </div>
+                <div class="ii">
+                  <label>Data de Envio</label><span id="c-data">—</span>
+                </div>
+                <div class="ii">
+                  <label>Prazo de Resposta</label><span>Até 10 dias úteis</span>
+                </div>
+              </div>
+              <div class="btn-group">
+                <button
+                  class="btn btn-success"
+                  onclick="ir('painelSolicitante')"
+                >
+                  Ir para o Painel
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTIFICAÇÃO AO SOLICITANTE (rejeição) -->
+          <div id="notifSolicitante" class="screen">
+            <div class="page-hd">
+              <h2>Notificação de Processo</h2>
+              <p>Seu processo foi analisado pelo aprovador.</p>
+            </div>
+
+            <div class="alert alert-danger">
+              ⚠️ Seu processo foi analisado e <strong>não aprovado</strong>.
+              Leia o motivo abaixo e, se necessário, abra um novo processo
+              corrigindo as pendências.
+            </div>
+
+            <div class="card">
+              <div class="info-grid" style="margin-bottom: 16px">
+                <div class="ii">
+                  <label>Protocolo</label><span id="ns-proto">—</span>
+                </div>
+                <div class="ii">
+                  <label>Status</label
+                  ><span><span class="badge rejeitado">Rejeitado</span></span>
+                </div>
+              </div>
+              <hr class="div" />
+              <div class="fg">
+                <label>Motivo da Rejeição</label>
+                <div class="box-content red" id="ns-motivo">—</div>
+              </div>
+              <p style="font-size: 13px; color: #888; margin-top: 0">
+                Você poderá abrir um novo processo corrigindo as pendências
+                apontadas.
+              </p>
+              <div class="btn-group">
+                <button class="btn btn-success" onclick="ir('cadastro')">
+                  Abrir Novo Processo
+                </button>
+                <button class="btn btn-ghost" onclick="ir('painelSolicitante')">
+                  Voltar ao Painel
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================
+               UC-02: FLUXO DO APROVADOR
+               ================================================ -->
+
+          <!-- PAINEL DO APROVADOR -->
+          <div id="painelAprovador" class="screen">
+            <div class="page-hd">
+              <h2>Painel do Aprovador</h2>
+              <p>Revise os processos na fila e registre suas decisões.</p>
+            </div>
+
+            <div class="metrics">
+              <div class="metric">
+                <div class="metric-val" id="a-fila">0</div>
+                <div class="metric-lbl">Na fila</div>
+              </div>
+              <div class="metric">
+                <div class="metric-val" id="a-aprovados">0</div>
+                <div class="metric-lbl">Aprovados hoje</div>
+              </div>
+              <div class="metric">
+                <div class="metric-val" id="a-rejeitados">0</div>
+                <div class="metric-lbl">Rejeitados hoje</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 style="margin-bottom: 16px">Fila de Processos</h3>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Protocolo</th>
+                    <th>Processo</th>
+                    <th>Solicitante</th>
+                    <th>Data de Envio</th>
+                    <th>Status</th>
+                    <th class="col-r">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="tb-fila">
+                  <tr>
+                    <td colspan="6">
+                      <div class="empty">
+                        <div class="eico">📂</div>
+                        Nenhum processo na fila.
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- REVISÃO DO PROCESSO -->
+          <div id="revisao" class="screen">
+            <div class="breadcrumb">
+              <a onclick="ir('painelAprovador')">Painel</a>
+              <span class="breadcrumb-sep">›</span> Revisão do Processo
+            </div>
+
+            <div class="card">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: flex-start;
+                  gap: 16px;
+                  flex-wrap: wrap;
+                  margin-bottom: 16px;
+                "
+              >
+                <div>
+                  <h3 style="margin: 0 0 8px">
+                    Processo <span id="rv-proto">—</span>
+                  </h3>
+                  <span class="badge andamento">Em análise</span>
+                </div>
+                <button class="btn btn-purple btn-sm" onclick="ir('decisao')">
+                  Ir para Decisão →
+                </button>
+              </div>
+              <hr class="div" />
+              <div class="info-grid" style="margin-bottom: 16px">
+                <div class="ii">
+                  <label>Nome do Processo</label><span id="rv-nome">—</span>
+                </div>
+                <div class="ii">
+                  <label>Tipo</label><span id="rv-tipo">—</span>
+                </div>
+                <div class="ii">
+                  <label>Solicitante</label><span id="rv-solicitante">—</span>
+                </div>
+                <div class="ii">
+                  <label>Data de Envio</label><span id="rv-data">—</span>
+                </div>
+              </div>
+              <div class="fg">
+                <label>Descrição / Justificativa</label>
+                <div class="box-content" id="rv-desc">—</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Documentos Anexados</h3>
+              <div class="doc-item">
+                <span style="font-size: 22px">📄</span>
+                <div>
+                  <div class="doc-name" id="rv-docnome">
+                    documento_principal.pdf
+                  </div>
+                  <div class="doc-meta">Documento enviado pelo solicitante</div>
+                </div>
+                <button
+                  class="btn btn-ghost btn-sm"
+                  style="margin-left: auto"
+                  disabled
+                >
+                  Visualizar
+                </button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Histórico do Processo</h3>
+              <ul class="timeline">
+                <li>
+                  <div class="tl-dot verde"></div>
+                  <div class="tl-content">
+                    <div class="tl-label">
+                      Processo criado e enviado pelo solicitante
+                    </div>
+                    <div class="tl-date" id="rv-hist-data">—</div>
+                  </div>
+                </li>
+                <li>
+                  <div class="tl-dot amarelo"></div>
+                  <div class="tl-content">
+                    <div class="tl-label">Aguardando análise do aprovador</div>
+                    <div class="tl-date">Agora</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- DECISÃO -->
+          <div id="decisao" class="screen">
+            <div class="breadcrumb">
+              <a onclick="ir('painelAprovador')">Painel</a>
+              <span class="breadcrumb-sep">›</span>
+              <a onclick="ir('revisao')">Revisão</a>
+              <span class="breadcrumb-sep">›</span> Decisão
+            </div>
+
+            <div class="card">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 16px;
+                  flex-wrap: wrap;
+                  gap: 10px;
+                "
+              >
+                <h3 style="margin: 0">
+                  Registrar Decisão — <span id="dec-proto">—</span>
+                </h3>
+                <span class="badge andamento">Em análise</span>
+              </div>
+
+              <div class="alert alert-warn">
+                ⚠️ Esta ação é irreversível. Certifique-se de ter revisado todos
+                os documentos antes de registrar a decisão.
+              </div>
+
+              <div class="fg">
+                <label
+                  >Parecer / Justificativa <span class="req">*</span></label
+                >
+                <textarea
+                  id="justificativa"
+                  placeholder="Descreva o parecer técnico ou a justificativa da decisão. Campo obrigatório."
+                ></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button class="btn btn-ghost" onclick="ir('revisao')">
+                  ← Voltar
+                </button>
+                <button class="btn btn-success" onclick="aprovar()">
+                  ✓ Aprovar
+                </button>
+                <button class="btn btn-danger" onclick="rejeitar()">
+                  ✕ Rejeitar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- APROVADO (confirmação aprovador) -->
+          <div id="decisaoOk" class="screen">
+            <div class="alert alert-success">
+              ✅ Decisão registrada com sucesso.
+            </div>
+
+            <div class="card">
+              <h3>Processo Aprovado</h3>
+              <div
+                style="
+                  display: flex;
+                  gap: 14px;
+                  align-items: center;
+                  margin-bottom: 18px;
+                "
+              >
+                <span style="font-size: 36px">🎉</span>
+                <div>
+                  <p style="margin: 0; font-size: 15px">
+                    O processo <strong id="ok-proto">—</strong> foi
+                    <strong>aprovado</strong>.
+                  </p>
+                  <p style="margin: 6px 0 0; font-size: 13px; color: #666">
+                    O solicitante receberá uma notificação automaticamente.
+                  </p>
+                </div>
+              </div>
+              <div class="info-grid" style="margin-bottom: 16px">
+                <div class="ii">
+                  <label>Protocolo</label><span id="ok-proto2">—</span>
+                </div>
+                <div class="ii">
+                  <label>Status Final</label
+                  ><span><span class="badge aprovado">Aprovado</span></span>
+                </div>
+                <div class="ii">
+                  <label>Aprovador</label><span id="ok-aprovador">—</span>
+                </div>
+                <div class="ii">
+                  <label>Data da Decisão</label><span id="ok-data">—</span>
+                </div>
+              </div>
+              <div class="fg">
+                <label>Parecer Registrado</label>
+                <div class="box-content green" id="ok-parecer">—</div>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-purple" onclick="ir('painelAprovador')">
+                  Voltar à Fila
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- REJEITADO (confirmação aprovador) -->
+          <div id="rejeitado" class="screen">
+            <div class="alert alert-danger">
+              ⚠️ Processo rejeitado. O motivo foi registrado e o solicitante
+              pode ser notificado.
+            </div>
+
+            <div class="card">
+              <h3>Processo Rejeitado</h3>
+              <div
+                style="
+                  display: flex;
+                  gap: 14px;
+                  align-items: center;
+                  margin-bottom: 18px;
+                "
+              >
+                <span style="font-size: 36px">❌</span>
+                <div>
+                  <p style="margin: 0; font-size: 15px">
+                    O processo <strong id="rej-proto">—</strong> foi
+                    <strong>rejeitado</strong>.
+                  </p>
+                </div>
+              </div>
+              <div class="info-grid" style="margin-bottom: 16px">
+                <div class="ii">
+                  <label>Protocolo</label><span id="rej-proto2">—</span>
+                </div>
+                <div class="ii">
+                  <label>Status Final</label
+                  ><span><span class="badge rejeitado">Rejeitado</span></span>
+                </div>
+              </div>
+              <div class="fg">
+                <label>Motivo da Rejeição</label>
+                <div class="box-content red" id="motivo">—</div>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-purple" onclick="notificarSolicitante()">
+                  📬 Notificar Solicitante
+                </button>
+                <button class="btn btn-ghost" onclick="ir('painelAprovador')">
+                  Voltar à Fila
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTIFICAÇÃO ENVIADA (aprovador) -->
+          <div id="notificacao" class="screen">
+            <div class="alert alert-info">
+              📬 Notificação enviada ao solicitante com sucesso.
+            </div>
+
+            <div class="card">
+              <div class="notif-banner">
+                <div class="nicon">📩</div>
+                <div>
+                  <h3>Solicitante Notificado</h3>
+                  <p>
+                    O solicitante foi informado sobre a rejeição do processo
+                    <strong id="notif-proto">—</strong> e o motivo foi
+                    comunicado para que possam tomar as providências
+                    necessárias.
+                  </p>
+                </div>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-purple" onclick="ir('painelAprovador')">
+                  Voltar à Fila
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /content -->
+      </div>
+      <!-- /main -->
+    </div>
+    <!-- /app -->
+
+    <!-- ============================================================
+         JAVASCRIPT
+         ============================================================ -->
     <script>
-      let processoAtual = {
-        id: null,
-        status: "",
-        historico: [],
+      var estado = {
+        role: null,
+        username: null,
+        processo: {
+          id: null,
+          nome: null,
+          tipo: null,
+          desc: null,
+          data: null,
+          status: null,
+          parecer: null,
+        },
       };
 
-      function go(id, tipo) {
-        document
-          .querySelectorAll(".screen")
-          .forEach((s) => s.classList.remove("active"));
-        document.getElementById(id).classList.add("active");
+      var navSol = [
+        { section: "Principal" },
+        { icon: "🏠", label: "Meu Painel", screen: "painelSolicitante" },
+        { icon: "➕", label: "Novo Processo", screen: "cadastro" },
+        { section: "Meus Processos" },
+        { icon: "📋", label: "Protocolo Gerado", screen: "confirmacao" },
+        { icon: "🔔", label: "Notificações", screen: "notifSolicitante" },
+      ];
 
-        if (tipo === "solicitante") header.className = "solicitante";
-        if (tipo === "aprovador") header.className = "aprovador";
+      var navApr = [
+        { section: "Principal" },
+        { icon: "🏠", label: "Painel", screen: "painelAprovador" },
+        { icon: "🔍", label: "Revisão", screen: "revisao" },
+        { section: "Decisões" },
+        { icon: "✅", label: "Aprovados", screen: "decisaoOk" },
+        { icon: "❌", label: "Rejeitados", screen: "rejeitado" },
+      ];
+
+      var screenTitles = {
+        painelSolicitante: "Meu Painel",
+        cadastro: "Novo Processo — Identificação",
+        upload: "Novo Processo — Documentos",
+        confirmacao: "Processo Enviado",
+        notifSolicitante: "Notificações",
+        painelAprovador: "Fila de Processos",
+        revisao: "Revisão do Processo",
+        decisao: "Registrar Decisão",
+        decisaoOk: "Processo Aprovado",
+        rejeitado: "Processo Rejeitado",
+        notificacao: "Notificação Enviada",
+      };
+
+      function entrar(role) {
+        var user =
+          document.getElementById("login-user").value.trim() ||
+          (role === "solicitante" ? "João Silva" : "Carlos Aprovador");
+        estado.role = role;
+        estado.username = user;
+
+        var isSol = role === "solicitante";
+        document.getElementById("sb-avatar").textContent = user
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("sb-avatar").className =
+          "avatar " + (isSol ? "sol" : "apr");
+        document.getElementById("sb-username").textContent = user;
+        document.getElementById("sb-role").textContent = isSol
+          ? "Solicitante"
+          : "Aprovador";
+        document.getElementById("tb-badge").className =
+          "tb-badge " + (isSol ? "sol" : "apr");
+        document.getElementById("tb-badge").textContent = isSol
+          ? "Solicitante"
+          : "Aprovador";
+
+        renderNav(isSol ? navSol : navApr);
+
+        document.getElementById("tela-login").classList.remove("ativo");
+        document.getElementById("app").classList.add("ativo");
+        ir(isSol ? "painelSolicitante" : "painelAprovador");
+      }
+
+      function logout() {
+        estado.role = null;
+        document.getElementById("login-user").value = "";
+        document.getElementById("login-pass").value = "";
+        document.getElementById("justificativa").value = "";
+        document.getElementById("app").classList.remove("ativo");
+        document.querySelectorAll(".screen").forEach(function (s) {
+          s.classList.remove("ativo");
+        });
+        document.getElementById("tela-login").classList.add("ativo");
+      }
+
+      function renderNav(items) {
+        var html = "";
+        items.forEach(function (item) {
+          if (item.section) {
+            html += '<div class="nav-section">' + item.section + "</div>";
+          } else {
+            html +=
+              '<div class="nav-item" data-screen="' +
+              item.screen +
+              '" onclick="ir(\'' +
+              item.screen +
+              "')\">" +
+              '<span class="ico">' +
+              item.icon +
+              "</span> " +
+              item.label +
+              "</div>";
+          }
+        });
+        document.getElementById("sb-nav").innerHTML = html;
+      }
+
+      function ir(id) {
+        document.querySelectorAll("#content .screen").forEach(function (s) {
+          s.classList.remove("ativo");
+        });
+        var alvo = document.getElementById(id);
+        if (alvo) alvo.classList.add("ativo");
+        document.getElementById("tb-title").textContent =
+          screenTitles[id] || id;
+        document.querySelectorAll(".nav-item").forEach(function (n) {
+          n.classList.toggle("ativo", n.dataset.screen === id);
+        });
+        document.getElementById("content").scrollTop = 0;
+      }
+
+      /* ===== UC-01 ===== */
+
+      function irParaUpload() {
+        var nome = document.getElementById("f-nome").value.trim();
+        var tipo = document.getElementById("f-tipo").value;
+        var desc = document.getElementById("f-desc").value.trim();
+        if (!nome || !tipo || !desc) {
+          alert("Preencha os campos obrigatórios: Nome, Tipo e Descrição.");
+          return;
+        }
+        estado.processo.nome = nome;
+        estado.processo.tipo = tipo;
+        estado.processo.desc = desc;
+        estado.processo.valor = document.getElementById("f-valor").value;
+        ir("upload");
       }
 
       function gerarProtocolo() {
-        processoAtual.id = Math.floor(Math.random() * 100000);
-        processoAtual.status = "Em análise";
-        processoAtual.historico = ["Solicitado", "Em análise"];
+        var agora = new Date();
+        var proto =
+          "PROC-" +
+          agora.getFullYear() +
+          "-" +
+          (Math.floor(Math.random() * 90000) + 10000);
+        var dataStr =
+          agora.toLocaleDateString("pt-BR") +
+          " " +
+          agora.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
 
-        document.getElementById("protocolo").innerText =
-          "Protocolo: #" + processoAtual.id;
-        document.getElementById("statusBadge").innerText = processoAtual.status;
+        estado.processo.id = proto;
+        estado.processo.data = dataStr;
+        estado.processo.status = "Em análise";
 
-        atualizarFila();
-        go("confirmacao");
+        document.getElementById("num-proto").textContent = proto;
+        document.getElementById("c-nome").textContent = estado.processo.nome;
+        document.getElementById("c-tipo").textContent = estado.processo.tipo;
+        document.getElementById("c-data").textContent = dataStr;
+
+        atualizarTabelaSol("andamento");
+        preencherFila();
+        ir("confirmacao");
       }
 
-      function atualizarFila() {
-        document.getElementById("filaId").innerText =
-          "Processo #" + processoAtual.id;
-        document.getElementById("statusFila").innerText = processoAtual.status;
+      function atualizarTabelaSol(statusKey) {
+        var labels = {
+          andamento: "Em análise",
+          aprovado: "Aprovado",
+          rejeitado: "Rejeitado",
+        };
+        var lbl = labels[statusKey] || statusKey;
+        var acaoHtml =
+          statusKey === "rejeitado"
+            ? '<button class="btn btn-ghost btn-sm" onclick="ir(\'notifSolicitante\')">Ver</button>'
+            : '<button class="btn btn-ghost btn-sm" onclick="ir(\'confirmacao\')">Ver</button>';
+
+        document.getElementById("tb-meus-processos").innerHTML =
+          "<tr>" +
+          "<td><strong>" +
+          estado.processo.id +
+          "</strong></td>" +
+          "<td>" +
+          estado.processo.nome +
+          "</td>" +
+          "<td>" +
+          estado.processo.data +
+          "</td>" +
+          '<td><span class="badge ' +
+          statusKey +
+          '">' +
+          lbl +
+          "</span></td>" +
+          '<td class="col-r">' +
+          acaoHtml +
+          "</td>" +
+          "</tr>";
+
+        document.getElementById("m-total").textContent = "1";
+        document.getElementById("m-analise").textContent =
+          statusKey === "andamento" ? "1" : "0";
+        document.getElementById("m-concluidos").textContent =
+          statusKey !== "andamento" ? "1" : "0";
       }
 
-      function carregarRevisao() {
-        document.getElementById("detalheProcesso").innerText =
-          "Processo #" + processoAtual.id;
-        let lista = document.getElementById("historico");
-        lista.innerHTML = "";
-        processoAtual.historico.forEach((h) => {
-          let li = document.createElement("li");
-          li.innerText = h;
-          lista.appendChild(li);
-        });
-      }
+      /* ===== UC-02 ===== */
 
-      document
-        .getElementById("revisao")
-        .addEventListener("click", carregarRevisao);
+      function preencherFila() {
+        document.getElementById("a-fila").textContent = "1";
+
+        document.getElementById("tb-fila").innerHTML =
+          "<tr>" +
+          "<td><strong>" +
+          estado.processo.id +
+          "</strong></td>" +
+          "<td>" +
+          estado.processo.nome +
+          "</td>" +
+          "<td>" +
+          (estado.username || "João Silva") +
+          "</td>" +
+          "<td>" +
+          estado.processo.data +
+          "</td>" +
+          '<td><span class="badge andamento">Em análise</span></td>' +
+          '<td class="col-r"><button class="btn btn-purple btn-sm" onclick="ir(\'revisao\')">Revisar</button></td>' +
+          "</tr>";
+
+        document.getElementById("rv-proto").textContent = estado.processo.id;
+        document.getElementById("rv-nome").textContent = estado.processo.nome;
+        document.getElementById("rv-tipo").textContent = estado.processo.tipo;
+        document.getElementById("rv-solicitante").textContent =
+          estado.username || "João Silva";
+        document.getElementById("rv-data").textContent = estado.processo.data;
+        document.getElementById("rv-desc").textContent = estado.processo.desc;
+        document.getElementById("rv-hist-data").textContent =
+          estado.processo.data;
+
+        var docPrincipal = document.getElementById("doc-principal");
+        if (docPrincipal && docPrincipal.files && docPrincipal.files[0]) {
+          document.getElementById("rv-docnome").textContent =
+            docPrincipal.files[0].name;
+        }
+
+        document.getElementById("dec-proto").textContent = estado.processo.id;
+      }
 
       function aprovar() {
-        if (!justificativa.value) {
-          alert("Justificativa obrigatória");
+        var parecer = document.getElementById("justificativa").value.trim();
+        if (!parecer) {
+          alert('O campo "Parecer / Justificativa" é obrigatório.');
           return;
         }
-        processoAtual.status = "Aprovado";
-        processoAtual.historico.push("Aprovado");
 
-        go("decisaoOk");
+        estado.processo.status = "Aprovado";
+        estado.processo.parecer = parecer;
+
+        var agora = new Date();
+        var dataStr =
+          agora.toLocaleDateString("pt-BR") +
+          " " +
+          agora.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+        document.getElementById("ok-proto").textContent = estado.processo.id;
+        document.getElementById("ok-proto2").textContent = estado.processo.id;
+        document.getElementById("ok-aprovador").textContent =
+          estado.username || "Aprovador";
+        document.getElementById("ok-data").textContent = dataStr;
+        document.getElementById("ok-parecer").textContent = parecer;
+
+        document.getElementById("a-fila").textContent = "0";
+        document.getElementById("a-aprovados").textContent = "1";
+        atualizarTabelaSol("aprovado");
+        ir("decisaoOk");
       }
 
       function rejeitar() {
-        if (!justificativa.value) {
-          alert("Justificativa obrigatória");
+        var parecer = document.getElementById("justificativa").value.trim();
+        if (!parecer) {
+          alert('O campo "Parecer / Justificativa" é obrigatório.');
           return;
         }
-        processoAtual.status = "Rejeitado";
-        processoAtual.historico.push("Rejeitado");
 
-        document.getElementById("motivo").innerText = justificativa.value;
-        go("rejeitado");
+        estado.processo.status = "Rejeitado";
+        estado.processo.parecer = parecer;
+
+        document.getElementById("motivo").textContent = parecer;
+        document.getElementById("rej-proto").textContent = estado.processo.id;
+        document.getElementById("rej-proto2").textContent = estado.processo.id;
+
+        document.getElementById("ns-proto").textContent = estado.processo.id;
+        document.getElementById("ns-motivo").textContent = parecer;
+
+        document.getElementById("a-fila").textContent = "0";
+        document.getElementById("a-rejeitados").textContent = "1";
+        atualizarTabelaSol("rejeitado");
+        ir("rejeitado");
+      }
+
+      function notificarSolicitante() {
+        document.getElementById("notif-proto").textContent = estado.processo.id;
+        ir("notificacao");
       }
     </script>
   </body>
