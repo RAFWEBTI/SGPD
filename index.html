@@ -12,10 +12,31 @@
         background: #f5f6fa;
       }
 
-      header {
-        padding: 15px 20px;
+      /* SIDEBAR */
+      .sidebar {
+        position: fixed;
+        width: 220px;
+        height: 100%;
+        background: #222;
         color: white;
-        font-size: 18px;
+        padding: 20px;
+      }
+
+      .sidebar h3 {
+        margin-top: 0;
+      }
+
+      .sidebar button {
+        width: 100%;
+        margin: 5px 0;
+        background: #444;
+      }
+
+      /* HEADER */
+      header {
+        margin-left: 220px;
+        padding: 15px;
+        color: white;
       }
 
       .solicitante {
@@ -25,12 +46,14 @@
         background: #6a1b9a;
       }
 
+      /* CONTAINER */
       .container {
+        margin-left: 220px;
         padding: 20px;
         max-width: 900px;
-        margin: auto;
       }
 
+      /* COMPONENTES */
       .screen {
         display: none;
       }
@@ -46,31 +69,20 @@
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
       }
 
-      h2 {
-        margin-top: 0;
-      }
-
       input,
       textarea {
         width: 100%;
         padding: 10px;
         margin: 10px 0;
-        border-radius: 5px;
-        border: 1px solid #ccc;
       }
 
       button {
-        padding: 10px 15px;
+        padding: 10px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
         background: #1976d2;
         color: white;
-        margin-right: 5px;
-      }
-
-      .secondary {
-        background: #999;
       }
 
       .danger {
@@ -78,32 +90,29 @@
       }
 
       .status {
-        padding: 6px 10px;
-        border-radius: 4px;
-        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
         font-size: 12px;
-        margin-bottom: 10px;
       }
 
-      .status.andamento {
+      .andamento {
         background: #fff3cd;
       }
-      .status.aprovado {
+      .aprovado {
         background: #c8e6c9;
       }
-      .status.rejeitado {
+      .rejeitado {
         background: #ffcdd2;
       }
 
       .steps {
         display: flex;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
       }
 
       .step {
         flex: 1;
         text-align: center;
-        font-size: 12px;
       }
 
       .step.active {
@@ -111,8 +120,20 @@
       }
     </style>
   </head>
+
   <body>
-    <header id="header">Sistema</header>
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+      <h3>Sistema</h3>
+      <button onclick="go('painelSolicitante', 'solicitante')">
+        Solicitante
+      </button>
+      <button onclick="go('painelAprovador', 'aprovador')">Aprovador</button>
+      <button onclick="go('login')">Sair</button>
+    </div>
+
+    <header id="header">Sistema de Processos</header>
 
     <div class="container">
       <!-- LOGIN -->
@@ -123,15 +144,15 @@
           <input placeholder="Usuário" />
           <input type="password" placeholder="Senha" />
           <button onclick="go('painelSolicitante', 'solicitante')">
-            Solicitante
+            Entrar como Solicitante
           </button>
           <button onclick="go('painelAprovador', 'aprovador')">
-            Aprovador
+            Entrar como Aprovador
           </button>
         </div>
       </div>
 
-      <!-- PAINEL SOLICITANTE -->
+      <!-- SOLICITANTE -->
 
       <div id="painelSolicitante" class="screen">
         <div class="card">
@@ -139,8 +160,6 @@
           <button onclick="go('cadastro')">Novo Processo</button>
         </div>
       </div>
-
-      <!-- CADASTRO -->
 
       <div id="cadastro" class="screen">
         <div class="steps">
@@ -155,8 +174,6 @@
         </div>
       </div>
 
-      <!-- UPLOAD -->
-
       <div id="upload" class="screen">
         <div class="steps">
           <div class="step">Cadastro</div>
@@ -164,53 +181,49 @@
           <div class="step">Confirmação</div>
         </div>
         <div class="card">
-          <h2>Upload de Documentos</h2>
+          <h2>Upload</h2>
           <input type="file" />
           <button onclick="gerarProtocolo()">Enviar</button>
         </div>
       </div>
 
-      <!-- CONFIRMAÇÃO -->
-
       <div id="confirmacao" class="screen">
-        <div class="steps">
-          <div class="step">Cadastro</div>
-          <div class="step">Upload</div>
-          <div class="step active">Confirmação</div>
-        </div>
         <div class="card">
-          <h2>Processo enviado</h2>
-          <span class="status andamento">Em análise</span>
+          <h2>Processo Enviado</h2>
+          <span id="statusBadge" class="status andamento"></span>
           <p id="protocolo"></p>
           <button onclick="go('login')">Finalizar</button>
         </div>
       </div>
 
-      <!-- PAINEL APROVADOR -->
+      <!-- APROVADOR -->
 
       <div id="painelAprovador" class="screen">
         <div class="card">
           <h2>Fila de Processos</h2>
           <div class="card">
-            <span class="status andamento">Em análise</span>
-            Processo #12345
-            <br /><br />
+            <span id="statusFila" class="status andamento"></span>
+            <p id="filaId"></p>
             <button onclick="go('revisao')">Revisar</button>
           </div>
         </div>
       </div>
 
-      <!-- REVISÃO -->
-
       <div id="revisao" class="screen">
         <div class="card">
-          <h2>Revisão do Processo</h2>
-          <p>Documentos e dados do processo...</p>
-          <button onclick="go('decisao')">Avançar para decisão</button>
+          <h2>Revisão</h2>
+          <p id="detalheProcesso"></p>
+
+          ```
+          <div class="card">
+            <h3>Histórico</h3>
+            <ul id="historico"></ul>
+          </div>
+
+          <button onclick="go('decisao')">Decidir</button>
+          ```
         </div>
       </div>
-
-      <!-- DECISÃO -->
 
       <div id="decisao" class="screen">
         <div class="card">
@@ -224,28 +237,22 @@
         </div>
       </div>
 
-      <!-- CONFIRMAÇÃO -->
-
       <div id="decisaoOk" class="screen">
         <div class="card">
-          <h2>Processo Aprovado</h2>
+          <h2>Aprovado</h2>
           <span class="status aprovado">Aprovado</span>
           <button onclick="go('login')">Encerrar</button>
         </div>
       </div>
 
-      <!-- REJEITADO -->
-
       <div id="rejeitado" class="screen">
         <div class="card">
-          <h2>Processo Rejeitado</h2>
+          <h2>Rejeitado</h2>
           <span class="status rejeitado">Rejeitado</span>
           <p id="motivo"></p>
           <button onclick="go('notificacao')">Notificar</button>
         </div>
       </div>
-
-      <!-- NOTIFICAÇÃO -->
 
       <div id="notificacao" class="screen">
         <div class="card">
@@ -256,6 +263,12 @@
     </div>
 
     <script>
+      let processoAtual = {
+        id: null,
+        status: "",
+        historico: [],
+      };
+
       function go(id, tipo) {
         document
           .querySelectorAll(".screen")
@@ -267,16 +280,48 @@
       }
 
       function gerarProtocolo() {
-        const num = Math.floor(Math.random() * 100000);
-        document.getElementById("protocolo").innerText = "Protocolo: #" + num;
+        processoAtual.id = Math.floor(Math.random() * 100000);
+        processoAtual.status = "Em análise";
+        processoAtual.historico = ["Solicitado", "Em análise"];
+
+        document.getElementById("protocolo").innerText =
+          "Protocolo: #" + processoAtual.id;
+        document.getElementById("statusBadge").innerText = processoAtual.status;
+
+        atualizarFila();
         go("confirmacao");
       }
+
+      function atualizarFila() {
+        document.getElementById("filaId").innerText =
+          "Processo #" + processoAtual.id;
+        document.getElementById("statusFila").innerText = processoAtual.status;
+      }
+
+      function carregarRevisao() {
+        document.getElementById("detalheProcesso").innerText =
+          "Processo #" + processoAtual.id;
+        let lista = document.getElementById("historico");
+        lista.innerHTML = "";
+        processoAtual.historico.forEach((h) => {
+          let li = document.createElement("li");
+          li.innerText = h;
+          lista.appendChild(li);
+        });
+      }
+
+      document
+        .getElementById("revisao")
+        .addEventListener("click", carregarRevisao);
 
       function aprovar() {
         if (!justificativa.value) {
           alert("Justificativa obrigatória");
           return;
         }
+        processoAtual.status = "Aprovado";
+        processoAtual.historico.push("Aprovado");
+
         go("decisaoOk");
       }
 
@@ -285,6 +330,9 @@
           alert("Justificativa obrigatória");
           return;
         }
+        processoAtual.status = "Rejeitado";
+        processoAtual.historico.push("Rejeitado");
+
         document.getElementById("motivo").innerText = justificativa.value;
         go("rejeitado");
       }
